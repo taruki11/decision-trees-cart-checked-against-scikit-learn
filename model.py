@@ -246,11 +246,27 @@ def rotation_sensitivity(
 
   return {"original_acc": orig_acc, "rotated_acc": rot_acc, "drop": drop}
 
-# Step 11 - regression_tree (not yet solved)
-# TODO: implement
+# Step 11 - regression_tree
+from sklearn.metrics import mean_squared_error
+from sklearn.tree import DecisionTreeRegressor
 
-# Step 12 - tree_rules (not yet solved)
-# TODO: implement
+
+def regression_tree(X, y, max_depth=2, random_state=42):
+  model = DecisionTreeRegressor(max_depth=max_depth, random_state=random_state)
+  model.fit(X, y)
+  preds = model.predict(X)
+  return {
+      "model": model,
+      "n_distinct_predictions": int(len(np.unique(preds))),
+      "train_mse": float(mean_squared_error(y, preds)),
+  }
+
+# Step 12 - tree_rules
+from sklearn.tree import export_text
+
+
+def tree_rules(clf, feature_names):
+  return export_text(clf, feature_names=list(feature_names))
 
 # Step 13 - save_and_reload_tree (not yet solved)
 # TODO: implement
