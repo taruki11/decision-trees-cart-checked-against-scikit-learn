@@ -55,8 +55,69 @@ def best_split(X, y):
     return (None, None, 0.0)
   return (int(best_feature), float(best_threshold), float(best_gain))
 
-# Step 3 - grow_tree (not yet solved)
-# TODO: implement
+# Step 3 - grow_tree
+def grow_tree(X, y, max_depth=2, min_samples_leaf=1, depth=0):
+  X = np.asarray(X)
+  y = np.asarray(y)
+  n, n_features = X.shape
+
+  # 多数表决（平局选类别编号较小者）
+  classes, counts = np.unique(y, return_counts=True)
+  max_c = np.max(counts)
+  maj_class = int(np.min(classes[counts == max_c]))
+
+  # 终止条件：纯净节点或达到最大深度
+  if len(classes) <= 1 or depth >= max_depth:
+    return {"leaf": True, "value": maj_class, "n": n}
+
+  # 寻找满足 min_samples_leaf 的最佳切分
+  parent_g = gini(y)
+  best_gain = 0.0
+  best_feature = None
+  best_threshold = None
+
+  for j in range(n_features):
+    v = X[:, j]
+    distinct = np.unique(v)
+    if len(distinct) <= 1:
+      continue
+    thresholds = (distinct[:-1] + distinct[1:]) / 2.0
+    for t in thresholds:
+      left_mask = v <= t
+      n_l = int(np.sum(left_mask))
+      n_r = n - n_l
+      if n_l < min_samples_leaf or n_r < min_samples_leaf:
+        continue
+      g = parent_g - (n_l * gini(y[left_mask]) + n_r * gini(y[~left_mask])) / n
+      if g > best_gain:
+        best_gain = g
+        best_feature = j
+        best_threshold = t
+
+  if best_feature is None or best_gain <= 0.0:
+    return {"leaf": True, "value": maj_class, "n": n}
+
+  left_mask = X[:, best_feature] <= best_threshold
+  return {
+      "leaf": False,
+      "feature": int(best_feature),
+      "threshold": float(best_threshold),
+      "n": n,
+      "left": grow_tree(
+          X[left_mask],
+          y[left_mask],
+          max_depth=max_depth,
+          min_samples_leaf=min_samples_leaf,
+          depth=depth + 1,
+      ),
+      "right": grow_tree(
+          X[~left_mask],
+          y[~left_mask],
+          max_depth=max_depth,
+          min_samples_leaf=min_samples_leaf,
+          depth=depth + 1,
+      ),
+  }
 
 # Step 4 - predict_tree (not yet solved)
 # TODO: implement
