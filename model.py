@@ -133,11 +133,28 @@ def predict_tree(tree, X):
     preds[i] = node["value"]
   return preds
 
-# Step 5 - fit_sklearn_tree (not yet solved)
-# TODO: implement
+# Step 5 - fit_sklearn_tree
+from sklearn.tree import DecisionTreeClassifier
 
-# Step 6 - sklearn_splits (not yet solved)
-# TODO: implement
+
+def fit_sklearn_tree(X, y, max_depth=2, min_samples_leaf=1, random_state=42):
+  clf = DecisionTreeClassifier(
+      criterion="gini",
+      max_depth=max_depth,
+      min_samples_leaf=min_samples_leaf,
+      random_state=random_state,
+  )
+  clf.fit(X, y)
+  return clf
+
+# Step 6 - sklearn_splits
+def sklearn_splits(clf):
+  tree = clf.tree_
+  splits = []
+  for i in range(tree.node_count):
+    if tree.children_left[i] != -1:  # 非叶子节点
+      splits.append((int(tree.feature[i]), round(float(tree.threshold[i]), 3)))
+  return splits
 
 # Step 7 - compare_trees (not yet solved)
 # TODO: implement
